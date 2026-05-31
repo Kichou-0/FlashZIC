@@ -4,6 +4,7 @@ import { usePlayer } from '../contexts/PlayerContext'
 import { useAuth } from '../contexts/AuthContext'
 import { GENRES } from '../lib/supabase'
 import AddToPlaylistModal from './AddToPlaylistModal'
+import { supabase } from '../lib/supabase'
 
 export default function TrackCard({ track, trackList = [] }) {
   const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer()
