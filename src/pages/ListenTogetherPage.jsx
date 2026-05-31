@@ -138,23 +138,27 @@ export default function ListenTogetherPage() {
   }
 
   async function handleRemoteUpdate(payload) {
-    if (payload.type === 'play_track') {
-      const { data: track } = await supabase.from('tracks').select('*').eq('id', payload.track_id).single()
-      if (track) {
-        playTrack(track, tracks.length ? tracks : [track])
-        setTimeout(() => seek(payload.position || 0), 500)
-      }
-    } else if (payload.type === 'toggle') {
-      togglePlay()
-    } else if (payload.type === 'sync') {
-      const diff = Math.abs(currentTime - payload.position)
-      if (diff > 2) seek(payload.position)
-    } else if (payload.type === 'skip_next') {
-      skipNext()
-    } else if (payload.type === 'skip_prev') {
-      skipPrev()
+  if (payload.type === 'play_track') {
+    const { data: track } = await supabase.from('tracks').select('*').eq('id', payload.track_id).single()
+    if (track) {
+      playTrack(track, tracks.length ? tracks : [track])
+      setTimeout(() => seek(payload.position || 0), 500)
     }
+  } else if (payload.type === 'play') {
+    const audio = document.querySelector('audio')
+    if (audio) audio.play()
+  } else if (payload.type === 'pause') {
+    const audio = document.querySelector('audio')
+    if (audio) audio.pause()
+  } else if (payload.type === 'sync') {
+    const diff = Math.abs(currentTime - payload.position)
+    if (diff > 2) seek(payload.position)
+  } else if (payload.type === 'skip_next') {
+    skipNext()
+  } else if (payload.type === 'skip_prev') {
+    skipPrev()
   }
+}
 
   function broadcastUpdate(payload) {
     if (!channelRef.current) return
@@ -173,10 +177,15 @@ export default function ListenTogetherPage() {
   }
 
   function handleHostToggle() {
-    if (!isHost) return
+  if (!isHost) return
+  if (isPlaying) {
     togglePlay()
-    broadcastUpdate({ type: 'toggle' })
+    broadcastUpdate({ type: 'pause' })
+  } else {
+    togglePlay()
+    broadcastUpdate({ type: 'play' })
   }
+}
 
   function handleHostSkipNext() {
     if (!isHost) return
