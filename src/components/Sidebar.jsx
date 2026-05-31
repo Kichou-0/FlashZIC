@@ -28,9 +28,13 @@ export default function Sidebar() {
 
       {profile && (
         <div className="sidebar-user">
-          <div className="sidebar-avatar">{profile.username?.[0]?.toUpperCase()}</div>
-          <span>{profile.username}</span>
-        </div>
+          {profile.avatar_url ? (
+            <img src={profile.avatar_url} alt="avatar" className="sidebar-avatar-img" />
+         ) : (
+        <div className="sidebar-avatar">{profile.username?.[0]?.toUpperCase()}</div>
+           )}
+        <span>{profile.username}</span>
+       </div>
       )}
     </aside>
   )
