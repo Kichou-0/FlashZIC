@@ -18,10 +18,8 @@ export default function TrackCard({ track, trackList = [] }) {
     togglePlay()
   } else {
     playTrack(track, trackList)
-    if (track.uploaded_by !== user?.id) {
-      supabase.rpc('increment_plays', { track_id: track.id })
-      track.plays = (track.plays || 0) + 1
-    }
+    supabase.rpc('increment_plays', { track_id: track.id })
+      .then(({ data, error }) => console.log('plays:', data, 'error:', error))
   }
 }
 
