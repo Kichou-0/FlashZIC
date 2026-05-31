@@ -1267,3 +1267,20 @@ input { font-family: inherit; }
   margin-bottom: 8px;
 }
 .listen-search:focus { border-color: var(--accent); }
+
+.session-badge {
+  margin-left: auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  letter-spacing: 0.5px;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
