@@ -21,6 +21,10 @@ export default function Sidebar() {
         <NavLink to="/upload" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
           <Upload size={20} /> <span>Upload</span>
         </NavLink>
+        <NavLink to="/listen" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+          <Headphones size={20} /> <span>Écoute ensemble</span>
+        </NavLink>
+
       </nav>
 
       {profile && (
