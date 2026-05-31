@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage'
 import UploadPage from './pages/UploadPage'
 import PlaylistsPage from './pages/PlaylistsPage'
 import ProfilePage from './pages/ProfilePage'
+import ListenTogetherPage from './pages/ListenTogetherPage'
 import './styles.css'
 
 function AppLayout() {
@@ -24,6 +25,8 @@ function AppLayout() {
           <Route path="/upload" element={<UploadPage />} />
           <Route path="/playlists" element={<PlaylistsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/listen" element={<ListenTogetherPage />} />
+          <Route path="/listen/:sessionId" element={<ListenTogetherPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
