@@ -1110,7 +1110,6 @@ input { font-family: inherit; }
 .my-track-item > div:not(.track-edit-form) {
   display: flex;
   align-items: center;
-  gap: 0;
 }
 
 .my-track-cover {
@@ -1126,7 +1125,11 @@ input { font-family: inherit; }
 .my-track-info {
   flex: 1;
   padding: 0 14px;
-  min-width: 0; /* permet le text-overflow */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
 }
 
 .my-track-info .track-title {
@@ -1140,24 +1143,23 @@ input { font-family: inherit; }
 .my-track-info .track-artist {
   font-size: 0.78rem;
   color: var(--muted);
-  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.my-track-info .track-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 5px;
+.my-track-info .genre-tag {
+  align-self: flex-start;
+  margin-top: 2px;
 }
 
 .my-track-actions {
   display: flex;
+  align-items: center;
   gap: 2px;
   padding: 0 10px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* ─── Edit form ──────────────────────────────────────── */
