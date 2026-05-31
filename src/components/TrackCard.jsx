@@ -19,7 +19,6 @@ function handlePlay() {
   } else {
     playTrack(track, trackList)
     supabase.rpc('increment_plays', { track_id: track.id })
-    track.plays = (track.plays || 0) + 1
   }
 }
   
