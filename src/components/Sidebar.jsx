@@ -22,7 +22,7 @@ export default function Sidebar() {
           <Upload size={20} /> <span>Upload</span>
         </NavLink>
         <NavLink to="/listen" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-          <Headphones size={20} /> <span>Écoute ensemble</span>
+          <Headphones size={20} /> <span>Session</span>
         </NavLink>
 
       </nav>
