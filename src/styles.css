@@ -835,3 +835,11 @@ input { font-family: inherit; }
   width: 16px; height: 16px;
   border-width: 2px;
 }
+
+.sidebar-avatar-img {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--accent);
+}
