@@ -145,10 +145,9 @@ export default function ListenTogetherPage() {
       setTimeout(() => seek(payload.position || 0), 500)
     }
   } else if (payload.type === 'play') {
-  audioRef.current.play().catch(() => {})
-} else if (payload.type === 'pause') {
-  audioRef.current.pause()
-}
+    audioRef.current.play().catch(() => {})
+  } else if (payload.type === 'pause') {
+    audioRef.current.pause()
   } else if (payload.type === 'sync') {
     const diff = Math.abs(currentTime - payload.position)
     if (diff > 2) seek(payload.position)
@@ -159,6 +158,7 @@ export default function ListenTogetherPage() {
   }
 }
 
+  
   function broadcastUpdate(payload) {
     if (!channelRef.current) return
     channelRef.current.send({
