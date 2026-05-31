@@ -212,7 +212,7 @@ export default function ListenTogetherPage() {
     return (
       <div className="page lobby-page">
         <div className="lobby-card">
-          <h1>🎧 Écoute en groupe</h1>
+          <h1>Session</h1>
           <p className="lobby-sub">Écoute de la musique en sync avec tes amis</p>
 
           <button className="btn-primary lobby-btn" onClick={createSession} disabled={loading}>
