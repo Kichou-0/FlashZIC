@@ -144,11 +144,14 @@ export default function ListenTogetherPage() {
   }
 
   async function subscribeToSession(id, host) {
-  // Nettoie l'ancien channel si existant
   if (channelRef.current) {
     await supabase.removeChannel(channelRef.current)
     channelRef.current = null
   }
+
+  // Supprime tous les channels existants avec ce nom
+  const existing = supabase.getChannels().find(c => c.topic === `realtime:listen:${id}`)
+  if (existing) await supabase.removeChannel(existing)
 
   const channel = supabase.channel(`listen:${id}`, {
     config: { presence: { key: user.id } }
@@ -189,7 +192,7 @@ export default function ListenTogetherPage() {
     }, 3000)
   }
 }
-
+  
   async function handleRemoteUpdate(payload) {
     if (payload.type === 'play_track') {
       const { data: track } = await supabase.from('tracks').select('*').eq('id', payload.track_id).single()
