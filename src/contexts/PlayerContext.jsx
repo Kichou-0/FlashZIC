@@ -84,10 +84,11 @@ export function PlayerProvider({ children }) {
   }
 
   return (
-    <PlayerContext.Provider value={{
-      currentTrack, isPlaying, currentTime, duration, volume, queue,
-      playTrack, togglePlay, skipNext, skipPrev, seek, changeVolume
-    }}>
+  <PlayerContext.Provider value={{
+    currentTrack, isPlaying, currentTime, duration, volume, queue,
+    playTrack, togglePlay, skipNext, skipPrev, seek, changeVolume,
+    audioRef
+  }}>
       {children}
     </PlayerContext.Provider>
   )
