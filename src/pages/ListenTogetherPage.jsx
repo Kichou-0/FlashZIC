@@ -34,7 +34,6 @@ export default function ListenTogetherPage() {
   useEffect(() => {
     fetchTracks()
     if (sessionId) handleJoinById(sessionId)
-    return () => { cleanup() }
   }, [])
 
   async function fetchTracks() {
@@ -43,9 +42,12 @@ export default function ListenTogetherPage() {
     tracksRef.current = data || []
   }
 
-  async function cleanup() {
-    if (syncInterval.current) clearInterval(syncInterval.current)
-    if (channelRef.current) await supabase.removeChannel(channelRef.current)
+  async function cleanup(deleteSession = false) {
+    if (syncInterval.current) { clearInterval(syncInterval.current); syncInterval.current = null }
+    if (channelRef.current) { await supabase.removeChannel(channelRef.current); channelRef.current = null }
+    if (deleteSession && session) {
+      await supabase.from('listen_sessions').delete().eq('id', session.id)
+    }
   }
 
   async function createSession() {
@@ -87,6 +89,7 @@ export default function ListenTogetherPage() {
   }
 
   function subscribeToSession(id, host) {
+    if (channelRef.current) return // déjà connecté
     const channel = supabase.channel(`listen:${id}`, { config: { presence: { key: user.id } } })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState()
@@ -138,10 +141,6 @@ export default function ListenTogetherPage() {
         const diff = Math.abs(audioRef.current.currentTime - payload.position)
         if (diff > 2) audioRef.current.currentTime = payload.position
       }
-    } else if (payload.type === 'skip_next') {
-      skipNext()
-    } else if (payload.type === 'skip_prev') {
-      skipPrev()
     }
   }
 
@@ -173,24 +172,21 @@ export default function ListenTogetherPage() {
   }
 
   function handleHostSkipNext() {
-  if (!isHost) return
-  const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
-  const next = tracks[(currentIndex + 1) % tracks.length]
-  if (next) handleHostPlay(next)
-}
+    if (!isHost) return
+    const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
+    const next = tracks[(currentIndex + 1) % tracks.length]
+    if (next) handleHostPlay(next)
+  }
 
-function handleHostSkipPrev() {
-  if (!isHost) return
-  const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
-  const prev = tracks[(currentIndex - 1 + tracks.length) % tracks.length]
-  if (prev) handleHostPlay(prev)
-}
+  function handleHostSkipPrev() {
+    if (!isHost) return
+    const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
+    const prev = tracks[(currentIndex - 1 + tracks.length) % tracks.length]
+    if (prev) handleHostPlay(prev)
+  }
 
   async function leaveSession() {
-    await cleanup()
-    if (isHostRef.current && session) {
-      await supabase.from('listen_sessions').delete().eq('id', session.id)
-    }
+    await cleanup(isHostRef.current)
     navigate('/')
   }
 
@@ -203,12 +199,11 @@ function handleHostSkipPrev() {
   const genre = currentTrack ? GENRES.find(g => g.id === currentTrack.genre) : null
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
-  // ── LOBBY ──────────────────────────────────────────────
   if (screen === 'lobby') {
     return (
       <div className="page lobby-page">
         <div className="lobby-card">
-          <h1>Session</h1>
+          <h1>🎧 Écoute en groupe</h1>
           <p className="lobby-sub">Écoute de la musique en sync avec tes amis</p>
           <button className="btn-primary lobby-btn" onClick={createSession} disabled={loading}>
             <Plus size={18} /> {loading ? 'Création...' : 'Créer une session'}
@@ -230,12 +225,11 @@ function handleHostSkipPrev() {
     )
   }
 
-  // ── SESSION ─────────────────────────────────────────────
   return (
     <div className="page listen-page">
       <div className="listen-header">
         <div>
-          <h1>Session</h1>
+          <h1>🎧 Écoute en groupe</h1>
           <div className="session-id-row">
             <span className="session-code">Code : <strong>{session?.id}</strong></span>
             <button className="btn-primary small" onClick={copyLink}>
