@@ -79,7 +79,7 @@ export default function PlaylistsPage() {
           {showCreate && (
             <form onSubmit={createPlaylist} className="create-playlist-form-full">
               <label className="playlist-cover-upload" style={{ backgroundImage: newCoverPreview ? `url(${newCoverPreview})` : 'none' }}>
-                {!newCoverPreview && <span>🎵 Cover</span>}
+                {!newCoverPreview && <span>🖼️</span>}
                 <input type="file" accept="image/*" hidden onChange={e => {
                   const f = e.target.files[0]
                   if (f) { setNewCover(f); setNewCoverPreview(URL.createObjectURL(f)) }
