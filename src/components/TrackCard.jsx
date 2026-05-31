@@ -13,16 +13,15 @@ export default function TrackCard({ track, trackList = [] }) {
   const isActive = currentTrack?.id === track.id
   const genre = GENRES.find(g => g.id === track.genre)
 
-  function handlePlay() {
+ function handlePlay() {
   if (isActive) {
     togglePlay()
   } else {
     playTrack(track, trackList)
     supabase.rpc('increment_plays', { track_id: track.id })
-      .then(({ data, error }) => console.log('plays:', data, 'error:', error))
+    track.plays = (track.plays || 0) + 1
   }
 }
-
   return (
     <>
       <div className={`track-card ${isActive ? 'active' : ''}`}>
