@@ -26,6 +26,11 @@ export default function ListenTogetherPage() {
   const [copied, setCopied] = useState(false)
   const [isHost, setIsHost] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [listenTab, setListenTab] = useState('all')
+  const [listenSearch, setListenSearch] = useState('')
+  const [playlists, setPlaylists] = useState([])
+  const [activePlaylist, setActivePlaylist] = useState(null)
+  const [playlistTracks, setPlaylistTracks] = useState([])
   const channelRef = useRef(null)
   const syncInterval = useRef(null)
   const isHostRef = useRef(false)
@@ -33,26 +38,37 @@ export default function ListenTogetherPage() {
 
   useEffect(() => {
     fetchTracks()
+    fetchPlaylists()
     if (sessionId) handleJoinById(sessionId)
   }, [])
 
- useEffect(() => {
-  if (!isHost || !audioRef?.current) return
-  const audio = audioRef.current
-  function onEnded() {
-    const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
-    const next = tracks[(currentIndex + 1) % tracks.length]
-    if (next) handleHostPlay(next)
-  }
-  audio.addEventListener('ended', onEnded)
-  return () => audio.removeEventListener('ended', onEnded)
-}, [isHost, currentTrack, tracks])
-  
-  
+  useEffect(() => {
+    if (!isHost || !audioRef?.current) return
+    const audio = audioRef.current
+    function onEnded() {
+      const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
+      const next = tracks[(currentIndex + 1) % tracks.length]
+      if (next) handleHostPlay(next)
+    }
+    audio.addEventListener('ended', onEnded)
+    return () => audio.removeEventListener('ended', onEnded)
+  }, [isHost, currentTrack, tracks])
+
   async function fetchTracks() {
     const { data } = await supabase.from('tracks').select('*').order('created_at', { ascending: false })
     setTracks(data || [])
     tracksRef.current = data || []
+  }
+
+  async function fetchPlaylists() {
+    const { data } = await supabase.from('playlists').select('*').eq('user_id', user.id)
+    setPlaylists(data || [])
+  }
+
+  async function openPlaylist(pl) {
+    setActivePlaylist(pl)
+    const { data } = await supabase.from('playlist_tracks').select('tracks(*)').eq('playlist_id', pl.id)
+    setPlaylistTracks(data?.map(r => r.tracks) || [])
   }
 
   async function cleanup(deleteSession = false) {
@@ -102,7 +118,7 @@ export default function ListenTogetherPage() {
   }
 
   function subscribeToSession(id, host) {
-    if (channelRef.current) return // déjà connecté
+    if (channelRef.current) return
     const channel = supabase.channel(`listen:${id}`, { config: { presence: { key: user.id } } })
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState()
@@ -212,11 +228,21 @@ export default function ListenTogetherPage() {
   const genre = currentTrack ? GENRES.find(g => g.id === currentTrack.genre) : null
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
+  const filteredTracks = tracks.filter(t =>
+    t.title.toLowerCase().includes(listenSearch.toLowerCase()) ||
+    t.artist.toLowerCase().includes(listenSearch.toLowerCase())
+  )
+
+  const filteredPlaylistTracks = playlistTracks.filter(t =>
+    t.title.toLowerCase().includes(listenSearch.toLowerCase()) ||
+    t.artist.toLowerCase().includes(listenSearch.toLowerCase())
+  )
+
   if (screen === 'lobby') {
     return (
       <div className="page lobby-page">
         <div className="lobby-card">
-          <h1>Session</h1>
+          <h1>🎧 Écoute en groupe</h1>
           <p className="lobby-sub">Écoute de la musique en sync avec tes amis</p>
           <button className="btn-primary lobby-btn" onClick={createSession} disabled={loading}>
             <Plus size={18} /> {loading ? 'Création...' : 'Créer une session'}
@@ -242,7 +268,7 @@ export default function ListenTogetherPage() {
     <div className="page listen-page">
       <div className="listen-header">
         <div>
-          <h1>Session</h1>
+          <h1>🎧 Écoute en groupe</h1>
           <div className="session-id-row">
             <span className="session-code">Code : <strong>{session?.id}</strong></span>
             <button className="btn-primary small" onClick={copyLink}>
@@ -319,29 +345,91 @@ export default function ListenTogetherPage() {
           {isHost && (
             <div className="listen-tracklist">
               <h3>🎵 Choisir un son</h3>
+
+              <div className="listen-tabs">
+                <button className={listenTab === 'all' ? 'active' : ''} onClick={() => { setListenTab('all'); setActivePlaylist(null) }}>Tous</button>
+                <button className={listenTab === 'playlist' ? 'active' : ''} onClick={() => setListenTab('playlist')}>Playlists</button>
+              </div>
+
+              <input
+                className="listen-search"
+                placeholder="Rechercher..."
+                value={listenSearch}
+                onChange={e => setListenSearch(e.target.value)}
+              />
+
               <div className="listen-tracks">
-                {tracks.map(t => {
-                  const g = GENRES.find(g => g.id === t.genre)
-                  return (
-                    <div key={t.id}
-                      className={`listen-track-row ${currentTrack?.id === t.id ? 'active' : ''}`}
-                      onClick={() => handleHostPlay(t)}>
-                      <div className="lt-cover" style={{
-                        backgroundImage: t.cover_url ? `url(${t.cover_url})` : 'none',
-                        backgroundColor: g?.color + '33'
-                      }}>
-                        {!t.cover_url && <span>{g?.emoji || '🎵'}</span>}
+                {listenTab === 'all' ? (
+                  filteredTracks.map(t => {
+                    const g = GENRES.find(g => g.id === t.genre)
+                    return (
+                      <div key={t.id}
+                        className={`listen-track-row ${currentTrack?.id === t.id ? 'active' : ''}`}
+                        onClick={() => handleHostPlay(t)}>
+                        <div className="lt-cover" style={{
+                          backgroundImage: t.cover_url ? `url(${t.cover_url})` : 'none',
+                          backgroundColor: g?.color + '33'
+                        }}>
+                          {!t.cover_url && <span>{g?.emoji || '🎵'}</span>}
+                        </div>
+                        <div>
+                          <p className="lt-title">{t.title}</p>
+                          <p className="lt-artist">{t.artist}</p>
+                        </div>
+                        {currentTrack?.id === t.id && isPlaying && (
+                          <div className="playing-indicator small"><span/><span/><span/></div>
+                        )}
                       </div>
-                      <div>
-                        <p className="lt-title">{t.title}</p>
-                        <p className="lt-artist">{t.artist}</p>
+                    )
+                  })
+                ) : !activePlaylist ? (
+                  playlists.length === 0 ? (
+                    <p className="empty">Aucune playlist</p>
+                  ) : (
+                    playlists.map(pl => (
+                      <div key={pl.id} className="listen-track-row" onClick={() => openPlaylist(pl)}>
+                        <div className="lt-cover" style={{
+                          backgroundImage: pl.cover_url ? `url(${pl.cover_url})` : 'none',
+                          backgroundColor: 'var(--bg3)'
+                        }}>
+                          {!pl.cover_url && <span>🎵</span>}
+                        </div>
+                        <div>
+                          <p className="lt-title">{pl.name}</p>
+                          <p className="lt-artist">Playlist</p>
+                        </div>
                       </div>
-                      {currentTrack?.id === t.id && isPlaying && (
-                        <div className="playing-indicator small"><span/><span/><span/></div>
-                      )}
-                    </div>
+                    ))
                   )
-                })}
+                ) : (
+                  <>
+                    <div className="listen-track-row" onClick={() => setActivePlaylist(null)}>
+                      <span style={{ color: 'var(--muted)', fontSize: '0.85rem', padding: '4px 0' }}>← Retour</span>
+                    </div>
+                    {filteredPlaylistTracks.map(t => {
+                      const g = GENRES.find(g => g.id === t.genre)
+                      return (
+                        <div key={t.id}
+                          className={`listen-track-row ${currentTrack?.id === t.id ? 'active' : ''}`}
+                          onClick={() => handleHostPlay(t)}>
+                          <div className="lt-cover" style={{
+                            backgroundImage: t.cover_url ? `url(${t.cover_url})` : 'none',
+                            backgroundColor: g?.color + '33'
+                          }}>
+                            {!t.cover_url && <span>{g?.emoji || '🎵'}</span>}
+                          </div>
+                          <div>
+                            <p className="lt-title">{t.title}</p>
+                            <p className="lt-artist">{t.artist}</p>
+                          </div>
+                          {currentTrack?.id === t.id && isPlaying && (
+                            <div className="playing-indicator small"><span/><span/><span/></div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </>
+                )}
               </div>
             </div>
           )}
