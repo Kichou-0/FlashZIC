@@ -38,8 +38,7 @@ export default function Sidebar() {
        </NavLink>
       )}
        <div className="sidebar-footer">
-        <p>Dev by <span className="sidebar-footer-name">Ton Nom</span></p>
-        <p>© {new Date().getFullYear()} FlashZIC</p>
+        <p>Dev by <span className="sidebar-footer-name">Kichou</span>© {new Date().getFullYear()} FlashZIC</p>
       </div>
     </aside>
   )
