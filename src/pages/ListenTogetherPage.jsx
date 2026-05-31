@@ -247,7 +247,7 @@ export default function ListenTogetherPage() {
     <div className="page listen-page">
       <div className="listen-header">
         <div>
-          <h1>🎧 Écoute en groupe</h1>
+          <h1>Session</h1>
           <div className="session-id-row">
             <span className="session-code">Code : <strong>{session?.id}</strong></span>
             <button className="btn-primary small" onClick={copyLink}>
