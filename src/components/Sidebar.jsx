@@ -26,7 +26,7 @@ export default function Sidebar() {
         </NavLink>
         <NavLink to="/listen" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
           <Headphones size={20} />
-          <span>Écoute ensemble</span>
+          <span>Session</span>
           {inSession && <span className="session-badge">EN DIRECT</span>}
         </NavLink>
       </nav>
