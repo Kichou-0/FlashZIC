@@ -13,7 +13,7 @@ export default function TrackCard({ track, trackList = [] }) {
   const isActive = currentTrack?.id === track.id
   const genre = GENRES.find(g => g.id === track.genre)
 
- function handlePlay() {
+function handlePlay() {
   if (isActive) {
     togglePlay()
   } else {
@@ -22,6 +22,7 @@ export default function TrackCard({ track, trackList = [] }) {
     track.plays = (track.plays || 0) + 1
   }
 }
+  
   return (
     <>
       <div className={`track-card ${isActive ? 'active' : ''}`}>
