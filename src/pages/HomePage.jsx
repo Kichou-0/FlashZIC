@@ -11,9 +11,11 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchTracks()
-  }, [])
-
+  fetchTracks()
+  const interval = setInterval(fetchTracks, 30000)
+  return () => clearInterval(interval)
+}, [])
+  
   useEffect(() => {
     let res = tracks
     if (activeGenre !== 'all') res = res.filter(t => t.genre === activeGenre)
