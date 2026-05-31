@@ -9,6 +9,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 export const GENRES = [
   { id: 'rap', label: 'Rap', emoji: '🎤', color: '#FF6B35' },
   { id: 'melo', label: 'Mélo', emoji: '💜', color: '#A855F7' },
+  { id: 'afro', label: 'Afro', emoji: '🕶️', color: '#AB1D3C' },
   { id: 'hiphop', label: 'Hip Hop', emoji: '🌍', color: '#4994CC' },
   { id: 'rock', label: 'Rock', emoji: '🤘', color: '#171616' },
   { id: 'pop', label: 'Pop', emoji: '✨', color: '#06B6D4' },
