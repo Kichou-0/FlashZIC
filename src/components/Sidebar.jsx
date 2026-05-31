@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Upload, ListMusic, User } from 'lucide-react'
+import { Home, Upload, ListMusic, Headphones } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Sidebar() {
