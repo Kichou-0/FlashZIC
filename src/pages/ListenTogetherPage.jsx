@@ -36,6 +36,19 @@ export default function ListenTogetherPage() {
     if (sessionId) handleJoinById(sessionId)
   }, [])
 
+ useEffect(() => {
+  if (!isHost || !audioRef?.current) return
+  const audio = audioRef.current
+  function onEnded() {
+    const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
+    const next = tracks[(currentIndex + 1) % tracks.length]
+    if (next) handleHostPlay(next)
+  }
+  audio.addEventListener('ended', onEnded)
+  return () => audio.removeEventListener('ended', onEnded)
+}, [isHost, currentTrack, tracks])
+  
+  
   async function fetchTracks() {
     const { data } = await supabase.from('tracks').select('*').order('created_at', { ascending: false })
     setTracks(data || [])
