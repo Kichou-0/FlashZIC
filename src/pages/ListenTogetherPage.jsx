@@ -38,19 +38,14 @@ export default function ListenTogetherPage() {
   const isHostRef = useRef(false)
   const tracksRef = useRef([])
 
-  useEffect(() => {
-    fetchTracks()
-    fetchPlaylists()
+ useEffect(() => {
+  fetchTracks()
+  fetchPlaylists()
 
-    // Check if already in a session
-    const saved = localStorage.getItem(SESSION_KEY)
-    if (saved) {
-      const { sessionId: savedId } = JSON.parse(saved)
-      handleJoinById(savedId)
-    } else if (sessionId) {
-      handleJoinById(sessionId)
-    }
-  }, [])
+  const saved = localStorage.getItem(SESSION_KEY)
+  const idToJoin = saved ? JSON.parse(saved).sessionId : sessionId
+  if (idToJoin) handleJoinById(idToJoin)
+}, [])
 
   useEffect(() => {
     if (!isHost || !audioRef?.current) return
