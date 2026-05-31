@@ -14,7 +14,7 @@ function fmt(s) {
 export default function ListenTogetherPage() {
   const { sessionId } = useParams()
   const { user, profile } = useAuth()
-  const { currentTrack, isPlaying, currentTime, duration, playTrack, togglePlay, skipNext, skipPrev, seek } = usePlayer()
+  const { currentTrack, isPlaying, currentTime, duration, playTrack, togglePlay, skipNext, skipPrev, seek, audioRef } = usePlayer()
   const navigate = useNavigate()
 
   const [screen, setScreen] = useState('lobby') // lobby | session
@@ -145,11 +145,10 @@ export default function ListenTogetherPage() {
       setTimeout(() => seek(payload.position || 0), 500)
     }
   } else if (payload.type === 'play') {
-    const audio = document.querySelector('audio')
-    if (audio) audio.play()
-  } else if (payload.type === 'pause') {
-    const audio = document.querySelector('audio')
-    if (audio) audio.pause()
+  audioRef.current.play().catch(() => {})
+} else if (payload.type === 'pause') {
+  audioRef.current.pause()
+}
   } else if (payload.type === 'sync') {
     const diff = Math.abs(currentTime - payload.position)
     if (diff > 2) seek(payload.position)
