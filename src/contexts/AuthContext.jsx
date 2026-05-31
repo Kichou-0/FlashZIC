@@ -12,12 +12,12 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) fetchProfile(session.user.id)
-      setLoading(false)
+      else setLoading(false)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) fetchProfile(session.user.id)
-      else setProfile(null)
+      else { setProfile(null); setLoading(false) }
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -25,10 +25,14 @@ export function AuthProvider({ children }) {
   async function fetchProfile(userId) {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
     setProfile(data)
+    setLoading(false)
   }
 
   async function signUp(email, password, username) {
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { username } } })
+    const { data, error } = await supabase.auth.signUp({
+      email, password,
+      options: { data: { username } }
+    })
     if (error) throw error
     if (data.user) {
       await supabase.from('profiles').insert({ id: data.user.id, username, avatar_url: null })
