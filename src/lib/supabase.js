@@ -14,5 +14,6 @@ export const GENRES = [
   { id: 'drill', label: 'Drill', emoji: '🔥', color: '#EF4444' },
   { id: 'trap', label: 'Trap', emoji: '⚡', color: '#3B82F6' },
   { id: 'pop', label: 'Pop', emoji: '✨', color: '#06B6D4' },
+  { id: 'brazil', label: 'Brazil', emoji: '🌴', color: '#52CC84' },
   { id: 'autre', label: 'Autre', emoji: '🎵', color: '#6B7280' },
 ]
