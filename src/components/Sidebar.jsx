@@ -15,14 +15,11 @@ export default function Sidebar() {
         <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
           <Home size={20} /> <span>Accueil</span>
         </NavLink>
-        <NavLink to="/upload" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-          <Upload size={20} /> <span>Upload</span>
-        </NavLink>
         <NavLink to="/playlists" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
           <ListMusic size={20} /> <span>Playlists</span>
         </NavLink>
-        <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-          <User size={20} /> <span>Profil</span>
+        <NavLink to="/upload" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+          <Upload size={20} /> <span>Upload</span>
         </NavLink>
       </nav>
 
