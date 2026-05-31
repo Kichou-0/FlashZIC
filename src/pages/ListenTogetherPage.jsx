@@ -6,6 +6,8 @@ import { usePlayer } from '../contexts/PlayerContext'
 import { Play, Pause, SkipForward, SkipBack, Users, Copy, Check, Music, LogOut, Plus, Hash } from 'lucide-react'
 import { GENRES } from '../lib/supabase'
 
+const SESSION_KEY = 'flashzic_session'
+
 function fmt(s) {
   if (!s || isNaN(s)) return '0:00'
   return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
@@ -14,7 +16,7 @@ function fmt(s) {
 export default function ListenTogetherPage() {
   const { sessionId } = useParams()
   const { user, profile } = useAuth()
-  const { currentTrack, isPlaying, currentTime, duration, playTrack, togglePlay, skipNext, skipPrev, seek, audioRef } = usePlayer()
+  const { currentTrack, isPlaying, currentTime, duration, playTrack, togglePlay, seek, audioRef } = usePlayer()
   const navigate = useNavigate()
 
   const [screen, setScreen] = useState('lobby')
@@ -39,7 +41,15 @@ export default function ListenTogetherPage() {
   useEffect(() => {
     fetchTracks()
     fetchPlaylists()
-    if (sessionId) handleJoinById(sessionId)
+
+    // Check if already in a session
+    const saved = localStorage.getItem(SESSION_KEY)
+    if (saved) {
+      const { sessionId: savedId } = JSON.parse(saved)
+      handleJoinById(savedId)
+    } else if (sessionId) {
+      handleJoinById(sessionId)
+    }
   }, [])
 
   useEffect(() => {
@@ -77,6 +87,7 @@ export default function ListenTogetherPage() {
     if (deleteSession && session) {
       await supabase.from('listen_sessions').delete().eq('id', session.id)
     }
+    localStorage.removeItem(SESSION_KEY)
   }
 
   async function createSession() {
@@ -89,6 +100,7 @@ export default function ListenTogetherPage() {
     setSession(data)
     setIsHost(true)
     isHostRef.current = true
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ sessionId: id, isHost: true }))
     navigate(`/listen/${id}`, { replace: true })
     subscribeToSession(id, true)
     setScreen('session')
@@ -100,12 +112,29 @@ export default function ListenTogetherPage() {
     setJoinError('')
     const code = id.toUpperCase().trim()
     const { data, error } = await supabase.from('listen_sessions').select('*').eq('id', code).single()
-    if (error || !data) { setJoinError('Session introuvable'); setLoading(false); return }
+    if (error || !data) {
+      setJoinError('Session introuvable')
+      localStorage.removeItem(SESSION_KEY)
+      setLoading(false)
+      return
+    }
     const host = data.host_id === user.id
     setSession(data)
     setIsHost(host)
     isHostRef.current = host
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ sessionId: code, isHost: host }))
     subscribeToSession(code, host)
+
+    if (data.track_id) {
+      const { data: track } = await supabase.from('tracks').select('*').eq('id', data.track_id).single()
+      if (track) {
+        playTrack(track, tracksRef.current.length ? tracksRef.current : [track])
+        setTimeout(() => {
+          if (audioRef?.current) audioRef.current.currentTime = data.position || 0
+        }, 800)
+      }
+    }
+
     navigate(`/listen/${code}`, { replace: true })
     setScreen('session')
     setLoading(false)
@@ -242,7 +271,7 @@ export default function ListenTogetherPage() {
     return (
       <div className="page lobby-page">
         <div className="lobby-card">
-          <h1>Session</h1>
+          <h1>🎧 Écoute en groupe</h1>
           <p className="lobby-sub">Écoute de la musique en sync avec tes amis</p>
           <button className="btn-primary lobby-btn" onClick={createSession} disabled={loading}>
             <Plus size={18} /> {loading ? 'Création...' : 'Créer une session'}
@@ -268,7 +297,7 @@ export default function ListenTogetherPage() {
     <div className="page listen-page">
       <div className="listen-header">
         <div>
-          <h1>Session</h1>
+          <h1>🎧 Écoute en groupe</h1>
           <div className="session-id-row">
             <span className="session-code">Code : <strong>{session?.id}</strong></span>
             <button className="btn-primary small" onClick={copyLink}>
@@ -345,59 +374,33 @@ export default function ListenTogetherPage() {
           {isHost && (
             <div className="listen-tracklist">
               <h3>🎵 Choisir un son</h3>
-
               <div className="listen-tabs">
                 <button className={listenTab === 'all' ? 'active' : ''} onClick={() => { setListenTab('all'); setActivePlaylist(null) }}>Tous</button>
                 <button className={listenTab === 'playlist' ? 'active' : ''} onClick={() => setListenTab('playlist')}>Playlists</button>
               </div>
-
-              <input
-                className="listen-search"
-                placeholder="Rechercher..."
-                value={listenSearch}
-                onChange={e => setListenSearch(e.target.value)}
-              />
-
+              <input className="listen-search" placeholder="Rechercher..." value={listenSearch} onChange={e => setListenSearch(e.target.value)} />
               <div className="listen-tracks">
                 {listenTab === 'all' ? (
                   filteredTracks.map(t => {
                     const g = GENRES.find(g => g.id === t.genre)
                     return (
-                      <div key={t.id}
-                        className={`listen-track-row ${currentTrack?.id === t.id ? 'active' : ''}`}
-                        onClick={() => handleHostPlay(t)}>
-                        <div className="lt-cover" style={{
-                          backgroundImage: t.cover_url ? `url(${t.cover_url})` : 'none',
-                          backgroundColor: g?.color + '33'
-                        }}>
+                      <div key={t.id} className={`listen-track-row ${currentTrack?.id === t.id ? 'active' : ''}`} onClick={() => handleHostPlay(t)}>
+                        <div className="lt-cover" style={{ backgroundImage: t.cover_url ? `url(${t.cover_url})` : 'none', backgroundColor: g?.color + '33' }}>
                           {!t.cover_url && <span>{g?.emoji || '🎵'}</span>}
                         </div>
-                        <div>
-                          <p className="lt-title">{t.title}</p>
-                          <p className="lt-artist">{t.artist}</p>
-                        </div>
-                        {currentTrack?.id === t.id && isPlaying && (
-                          <div className="playing-indicator small"><span/><span/><span/></div>
-                        )}
+                        <div><p className="lt-title">{t.title}</p><p className="lt-artist">{t.artist}</p></div>
+                        {currentTrack?.id === t.id && isPlaying && <div className="playing-indicator small"><span/><span/><span/></div>}
                       </div>
                     )
                   })
                 ) : !activePlaylist ? (
-                  playlists.length === 0 ? (
-                    <p className="empty">Aucune playlist</p>
-                  ) : (
+                  playlists.length === 0 ? <p className="empty">Aucune playlist</p> : (
                     playlists.map(pl => (
                       <div key={pl.id} className="listen-track-row" onClick={() => openPlaylist(pl)}>
-                        <div className="lt-cover" style={{
-                          backgroundImage: pl.cover_url ? `url(${pl.cover_url})` : 'none',
-                          backgroundColor: 'var(--bg3)'
-                        }}>
+                        <div className="lt-cover" style={{ backgroundImage: pl.cover_url ? `url(${pl.cover_url})` : 'none', backgroundColor: 'var(--bg3)' }}>
                           {!pl.cover_url && <span>🎵</span>}
                         </div>
-                        <div>
-                          <p className="lt-title">{pl.name}</p>
-                          <p className="lt-artist">Playlist</p>
-                        </div>
+                        <div><p className="lt-title">{pl.name}</p><p className="lt-artist">Playlist</p></div>
                       </div>
                     ))
                   )
@@ -409,22 +412,12 @@ export default function ListenTogetherPage() {
                     {filteredPlaylistTracks.map(t => {
                       const g = GENRES.find(g => g.id === t.genre)
                       return (
-                        <div key={t.id}
-                          className={`listen-track-row ${currentTrack?.id === t.id ? 'active' : ''}`}
-                          onClick={() => handleHostPlay(t)}>
-                          <div className="lt-cover" style={{
-                            backgroundImage: t.cover_url ? `url(${t.cover_url})` : 'none',
-                            backgroundColor: g?.color + '33'
-                          }}>
+                        <div key={t.id} className={`listen-track-row ${currentTrack?.id === t.id ? 'active' : ''}`} onClick={() => handleHostPlay(t)}>
+                          <div className="lt-cover" style={{ backgroundImage: t.cover_url ? `url(${t.cover_url})` : 'none', backgroundColor: g?.color + '33' }}>
                             {!t.cover_url && <span>{g?.emoji || '🎵'}</span>}
                           </div>
-                          <div>
-                            <p className="lt-title">{t.title}</p>
-                            <p className="lt-artist">{t.artist}</p>
-                          </div>
-                          {currentTrack?.id === t.id && isPlaying && (
-                            <div className="playing-indicator small"><span/><span/><span/></div>
-                          )}
+                          <div><p className="lt-title">{t.title}</p><p className="lt-artist">{t.artist}</p></div>
+                          {currentTrack?.id === t.id && isPlaying && <div className="playing-indicator small"><span/><span/><span/></div>}
                         </div>
                       )
                     })}
