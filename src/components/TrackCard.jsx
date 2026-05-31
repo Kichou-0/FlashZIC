@@ -13,9 +13,13 @@ export default function TrackCard({ track, trackList = [] }) {
   const genre = GENRES.find(g => g.id === track.genre)
 
   function handlePlay() {
-    if (isActive) togglePlay()
-    else playTrack(track, trackList)
+  if (isActive) {
+    togglePlay()
+  } else {
+    playTrack(track, trackList)
+    supabase.rpc('increment_plays', { track_id: track.id })
   }
+}
 
   return (
     <>
