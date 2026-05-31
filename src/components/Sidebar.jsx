@@ -24,7 +24,7 @@ export default function Sidebar() {
       </nav>
 
       {profile && (
-        <div className="sidebar-user">
+        <NavLink to="/profile" className="sidebar-user">
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt="avatar" className="sidebar-avatar-img" />
          ) : (
