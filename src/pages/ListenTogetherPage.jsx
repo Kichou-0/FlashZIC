@@ -50,7 +50,7 @@ export default function ListenTogetherPage() {
       host_id: user.id,
       track_id: null,
       is_playing: false,
-      current_time: 0,
+      position: 0,
     }).select().single()
     if (data) {
       setSession(data)
@@ -73,7 +73,7 @@ export default function ListenTogetherPage() {
       const { data: track } = await supabase.from('tracks').select('*').eq('id', data.track_id).single()
       if (track) {
         playTrack(track, [track])
-        setTimeout(() => seek(data.current_time || 0), 500)
+        setTimeout(() => seek(data.position || 0), 500)
         if (!data.is_playing) togglePlay()
       }
     }
@@ -104,7 +104,7 @@ export default function ListenTogetherPage() {
     // Host broadcasts position every 3s
     if (isHost) {
       syncInterval.current = setInterval(() => {
-        broadcastUpdate({ type: 'sync', current_time: currentTime })
+        broadcastUpdate({ type: 'sync', position: currentTime })
       }, 3000)
     }
   }
@@ -116,8 +116,8 @@ export default function ListenTogetherPage() {
     } else if (payload.type === 'toggle') {
       togglePlay()
     } else if (payload.type === 'sync') {
-      const diff = Math.abs(currentTime - payload.current_time)
-      if (diff > 2) seek(payload.current_time)
+      const diff = Math.abs(currentTime - payload.position)
+      if (diff > 2) seek(payload.position)
     } else if (payload.type === 'skip_next') {
       skipNext()
     } else if (payload.type === 'skip_prev') {
@@ -138,7 +138,7 @@ export default function ListenTogetherPage() {
     if (!isHost) return
     playTrack(track, tracks)
     broadcastUpdate({ type: 'play_track', track_id: track.id })
-    supabase.from('listen_sessions').update({ track_id: track.id, is_playing: true, current_time: 0 }).eq('id', session?.id)
+    supabase.from('listen_sessions').update({ track_id: track.id, is_playing: true, position: 0 }).eq('id', session?.id)
   }
 
   function handleHostToggle() {
