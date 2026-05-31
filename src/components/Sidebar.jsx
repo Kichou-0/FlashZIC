@@ -2,8 +2,11 @@ import { NavLink } from 'react-router-dom'
 import { Home, Upload, ListMusic, Headphones } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
+const SESSION_KEY = 'flashzic_session'
+
 export default function Sidebar() {
   const { profile } = useAuth()
+  const inSession = !!localStorage.getItem(SESSION_KEY)
 
   return (
     <aside className="sidebar">
@@ -15,29 +18,30 @@ export default function Sidebar() {
         <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
           <Home size={20} /> <span>Accueil</span>
         </NavLink>
-        <NavLink to="/playlists" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-          <ListMusic size={20} /> <span>Playlists</span>
-        </NavLink>
         <NavLink to="/upload" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
           <Upload size={20} /> <span>Upload</span>
         </NavLink>
-        <NavLink to="/listen" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-          <Headphones size={20} /> <span>Session</span>
+        <NavLink to="/playlists" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+          <ListMusic size={20} /> <span>Playlists</span>
         </NavLink>
-
+        <NavLink to="/listen" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+          <Headphones size={20} />
+          <span>Écoute ensemble</span>
+          {inSession && <span className="session-badge">EN DIRECT</span>}
+        </NavLink>
       </nav>
 
       {profile && (
         <NavLink to="/profile" className="sidebar-user">
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt="avatar" className="sidebar-avatar-img" />
-         ) : (
-        <div className="sidebar-avatar">{profile.username?.[0]?.toUpperCase()}</div>
-           )}
-        <span>{profile.username}</span>
-       </NavLink>
+          ) : (
+            <div className="sidebar-avatar">{profile.username?.[0]?.toUpperCase()}</div>
+          )}
+          <span>{profile.username}</span>
+        </NavLink>
       )}
-       <div className="sidebar-footer">
+      <div className="sidebar-footer">
         <p>Dev by <span className="sidebar-footer-name">Kichou</span> © {new Date().getFullYear()} FlashZIC</p>
       </div>
     </aside>
