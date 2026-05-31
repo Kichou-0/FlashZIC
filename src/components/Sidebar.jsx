@@ -31,7 +31,7 @@ export default function Sidebar() {
         <div className="sidebar-avatar">{profile.username?.[0]?.toUpperCase()}</div>
            )}
         <span>{profile.username}</span>
-       </div>
+       </NavLink>
       )}
     </aside>
   )
