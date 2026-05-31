@@ -173,16 +173,18 @@ export default function ListenTogetherPage() {
   }
 
   function handleHostSkipNext() {
-    if (!isHost) return
-    skipNext()
-    broadcastUpdate({ type: 'skip_next' })
-  }
+  if (!isHost) return
+  const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
+  const next = tracks[(currentIndex + 1) % tracks.length]
+  if (next) handleHostPlay(next)
+}
 
-  function handleHostSkipPrev() {
-    if (!isHost) return
-    skipPrev()
-    broadcastUpdate({ type: 'skip_prev' })
-  }
+function handleHostSkipPrev() {
+  if (!isHost) return
+  const currentIndex = tracks.findIndex(t => t.id === currentTrack?.id)
+  const prev = tracks[(currentIndex - 1 + tracks.length) % tracks.length]
+  if (prev) handleHostPlay(prev)
+}
 
   async function leaveSession() {
     await cleanup()
