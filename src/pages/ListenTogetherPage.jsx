@@ -142,39 +142,46 @@ export default function ListenTogetherPage() {
   }
 
   function subscribeToSession(id, host) {
-    if (channelRef.current) return
-    const channel = supabase.channel(`listen:${id}`, { config: { presence: { key: user.id } } })
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState()
-        setMembers(Object.values(state).flat())
-      })
-      .on('broadcast', { event: 'player_update' }, ({ payload }) => {
-        if (payload.user_id === user.id) return
-        if (!isHostRef.current) handleRemoteUpdate(payload)
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({
-            user_id: user.id,
-            username: profile?.username || user?.email?.split('@')[0] || 'Inconnu',
-            avatar: profile?.avatar_url || null,
-          })
-        }
-      })
-    channelRef.current = channel
+  if (channelRef.current) return
+  
+  const channel = supabase.channel(`listen:${id}:${user.id}`, {
+    config: { presence: { key: user.id } }
+  })
 
-    if (host) {
-      syncInterval.current = setInterval(() => {
-        if (channelRef.current && audioRef?.current) {
-          channelRef.current.send({
-            type: 'broadcast',
-            event: 'player_update',
-            payload: { type: 'sync', position: audioRef.current.currentTime, user_id: user.id }
-          })
-        }
-      }, 3000)
+  channel.on('presence', { event: 'sync' }, () => {
+    const state = channel.presenceState()
+    setMembers(Object.values(state).flat())
+  })
+
+  channel.on('broadcast', { event: 'player_update' }, ({ payload }) => {
+    if (payload.user_id === user.id) return
+    if (!isHostRef.current) handleRemoteUpdate(payload)
+  })
+
+  channel.subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') {
+      await channel.track({
+        user_id: user.id,
+        username: profile?.username || user?.email?.split('@')[0] || 'Inconnu',
+        avatar: profile?.avatar_url || null,
+      })
     }
+  })
+
+  channelRef.current = channel
+
+  if (host) {
+    syncInterval.current = setInterval(() => {
+      if (channelRef.current && audioRef?.current) {
+        channelRef.current.send({
+          type: 'broadcast',
+          event: 'player_update',
+          payload: { type: 'sync', position: audioRef.current.currentTime, user_id: user.id }
+        })
+      }
+    }, 3000)
   }
+}
 
   async function handleRemoteUpdate(payload) {
     if (payload.type === 'play_track') {
