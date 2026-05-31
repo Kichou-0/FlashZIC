@@ -141,10 +141,14 @@ export default function ListenTogetherPage() {
     await handleJoinById(joinCode)
   }
 
-  function subscribeToSession(id, host) {
-  if (channelRef.current) return
-  
-  const channel = supabase.channel(`listen:${id}:${user.id}`, {
+  async function subscribeToSession(id, host) {
+  // Nettoie l'ancien channel si existant
+  if (channelRef.current) {
+    await supabase.removeChannel(channelRef.current)
+    channelRef.current = null
+  }
+
+  const channel = supabase.channel(`listen:${id}`, {
     config: { presence: { key: user.id } }
   })
 
@@ -171,6 +175,7 @@ export default function ListenTogetherPage() {
   channelRef.current = channel
 
   if (host) {
+    if (syncInterval.current) clearInterval(syncInterval.current)
     syncInterval.current = setInterval(() => {
       if (channelRef.current && audioRef?.current) {
         channelRef.current.send({
