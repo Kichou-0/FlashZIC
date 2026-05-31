@@ -37,7 +37,8 @@ export default function ListenTogetherPage() {
   const syncInterval = useRef(null)
   const isHostRef = useRef(false)
   const tracksRef = useRef([])
-
+  const joiningRef = useRef(false)
+  
  useEffect(() => {
   fetchTracks()
   fetchPlaylists()
@@ -103,38 +104,39 @@ export default function ListenTogetherPage() {
   }
 
   async function handleJoinById(id) {
-    setLoading(true)
-    setJoinError('')
-    const code = id.toUpperCase().trim()
-    const { data, error } = await supabase.from('listen_sessions').select('*').eq('id', code).single()
-    if (error || !data) {
-      setJoinError('Session introuvable')
-      localStorage.removeItem(SESSION_KEY)
-      setLoading(false)
-      return
-    }
-    const host = data.host_id === user.id
-    setSession(data)
-    setIsHost(host)
-    isHostRef.current = host
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ sessionId: code, isHost: host }))
-    subscribeToSession(code, host)
-
-    if (data.track_id) {
-      const { data: track } = await supabase.from('tracks').select('*').eq('id', data.track_id).single()
-      if (track) {
-        playTrack(track, tracksRef.current.length ? tracksRef.current : [track])
-        setTimeout(() => {
-          if (audioRef?.current) audioRef.current.currentTime = data.position || 0
-        }, 800)
-      }
-    }
-
-    navigate(`/listen/${code}`, { replace: true })
-    setScreen('session')
+  if (joiningRef.current) return
+  joiningRef.current = true
+  setLoading(true)
+  setJoinError('')
+  const code = id.toUpperCase().trim()
+  const { data, error } = await supabase.from('listen_sessions').select('*').eq('id', code).single()
+  if (error || !data) {
+    setJoinError('Session introuvable')
+    localStorage.removeItem(SESSION_KEY)
+    joiningRef.current = false
     setLoading(false)
+    return
   }
-
+  const host = data.host_id === user.id
+  setSession(data)
+  setIsHost(host)
+  isHostRef.current = host
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ sessionId: code, isHost: host }))
+  subscribeToSession(code, host)
+  if (data.track_id) {
+    const { data: track } = await supabase.from('tracks').select('*').eq('id', data.track_id).single()
+    if (track) {
+      playTrack(track, tracksRef.current.length ? tracksRef.current : [track])
+      setTimeout(() => {
+        if (audioRef?.current) audioRef.current.currentTime = data.position || 0
+      }, 800)
+    }
+  }
+  navigate(`/listen/${code}`, { replace: true })
+  setScreen('session')
+  joiningRef.current = false
+  setLoading(false)
+}
   async function handleJoinByCode(e) {
     e.preventDefault()
     if (!joinCode.trim()) return
