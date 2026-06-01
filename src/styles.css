@@ -1291,7 +1291,7 @@ input { font-family: inherit; }
 
   .app-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr var(--player-h) 60px;
+    grid-template-rows: 1fr var(--player-h);
     height: 100vh;
   }
 
