@@ -693,19 +693,6 @@ input { font-family: inherit; }
   color: var(--muted);
 }
 
-/* ─── Responsive ─────────────────────────────────────── */
-@media (max-width: 768px) {
-  :root { --sidebar-w: 64px; }
-  .sidebar-logo, .nav-link span, .sidebar-user span { display: none; }
-  .nav-link { justify-content: center; padding: 12px; }
-  .sidebar-user { justify-content: center; }
-  .main-content { padding: 20px 16px; }
-  .upload-grid { grid-template-columns: 1fr; }
-  .cover-upload { width: 100%; height: 120px; }
-  .hero h1 { font-size: 2rem; }
-  .player-bar { grid-template-columns: auto 1fr; }
-  .player-right { display: none; }
-}
 
 /* ─── Modal ──────────────────────────────────────────── */
 .modal-overlay {
