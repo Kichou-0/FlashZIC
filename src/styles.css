@@ -1287,11 +1287,9 @@ input { font-family: inherit; }
 
 /* ─── Mobile Responsive ──────────────────────────────── */
 @media (max-width: 768px) {
-  :root { --player-h: 64px; }
-
   .app-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr var(--player-h);
+    grid-template-rows: 1fr var(--player-h) 60px;
     height: 100vh;
   }
 
