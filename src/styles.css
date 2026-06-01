@@ -1276,18 +1276,26 @@ input { font-family: inherit; }
 @media (max-width: 768px) {
   .app-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr var(--player-h) 60px;
+    grid-template-rows: 1fr var(--player-h);
     height: 100vh;
   }
 
-  .main-content { grid-column: 1; grid-row: 1; padding: 16px 14px; }
+  .main-content {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 16px 14px;
+    padding-bottom: 140px;
+  }
 
   .sidebar {
-    grid-column: 1; grid-row: 3;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
     flex-direction: row; align-items: center;
     padding: 0 8px; border-right: none;
     border-top: 1px solid var(--border);
     height: 60px; gap: 0;
+    z-index: 100;
+    grid-row: unset;
   }
 
   .sidebar-logo { display: none; }
