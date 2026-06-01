@@ -35,7 +35,7 @@ input { font-family: inherit; }
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
   grid-template-rows: 1fr var(--player-h);
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
