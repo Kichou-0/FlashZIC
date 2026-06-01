@@ -41,9 +41,6 @@ export default function Sidebar() {
           <span>{profile.username}</span>
         </NavLink>
       )}
-      <div className="sidebar-footer">
-        <p>Dev by <span className="sidebar-footer-name">Kichou</span> © {new Date().getFullYear()} FlashZIC</p>
-      </div>
     </aside>
   )
 }
