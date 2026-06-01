@@ -255,10 +255,11 @@ export default function ListenTogetherPage() {
     if (prev) handleHostPlay(prev)
   }
 
-  async function leaveSession() {
-    await cleanup(isHostRef.current)
-    navigate('/')
-  }
+ async function leaveSession() {
+  await cleanup(isHostRef.current)
+  setScreen('lobby')
+  navigate('/listen')
+}
 
   function copyLink() {
     navigator.clipboard.writeText(`${window.location.origin}/listen/${session?.id}`)
