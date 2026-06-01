@@ -150,7 +150,7 @@ export default function UploadPage() {
         )}
 
         <button type="submit" className="btn-primary upload-btn" disabled={uploading}>
-          {uploading ? `Upload en cours... ${progress}%` : '🚀 Publier le son'}
+          {uploading ? `Upload en cours... ${progress}%` : 'Publier le son'}
         </button>
       </form>
     </div>
