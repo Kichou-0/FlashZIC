@@ -81,7 +81,7 @@ export default function UploadPage() {
   return (
     <div className="page upload-page">
       <div className="page-header">
-        <h1>Upload un son <span style={{color: 'var(--muted)', fontWeight: 400, fontSize: '1rem'}}>— Partage ta musique avec la communauté FlashZIC</span></h1>
+        <h1>Upload un son <span style={{color: 'var(--muted)', fontWeight: 400, fontSize: '1rem'}}>   Partage ta musique avec la communauté FlashZIC</span></h1>
       </div>
 
       {done && (
