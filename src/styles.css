@@ -176,7 +176,7 @@ input { font-family: inherit; }
 
 .play-btn {
   background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
-  color: dark !important;
+  color: white !important;
   width: 42px; height: 42px;
 }
 .play-btn:hover { opacity: 0.9; transform: scale(1.05); }
