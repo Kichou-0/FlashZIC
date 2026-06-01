@@ -294,7 +294,7 @@ export default function ListenTogetherPage() {
             <div className="join-input-row">
               <Hash size={18} />
               <input value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())}
-                placeholder="Code de session (ex: ABC123)" maxLength={8} autoFocus />
+                placeholder="Code de session" maxLength={8} autoFocus />
             </div>
             {joinError && <p className="join-error">{joinError}</p>}
             <button type="submit" className="btn-primary lobby-btn" disabled={loading}>
